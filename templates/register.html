@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+    <form class="register-form" action="" method="post">
+        {{ form.hidden_tag() }}
+        {{ form.csrf_token }}
+        <h2>Register</h2>
+        <p>
+            {{ form.email.label }}<br>
+            {{ form.email(class='form-control', type='email' )}}<br>
+            {% for error in form.email.errors %}
+                <p class="alert alert-danger" role="alert">{{ error }}</p>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.password.label }}<br>
+            {{ form.password(class="form-control", type="password")}}<br>
+            {% for error in form.password.errors %}
+                <p class="alert alert-danger" role="alert">{{ error }}</p>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.passwordRepeat.label }}<br>
+            {{ form.passwordRepeat(class="form-control", type="password")}}<br>
+            {% for error in form.passwordRepeat.errors %}
+                <p class="alert alert-danger" role="alert">{{ error }}</p>
+            {% endfor %}
+        </p>
+        {% for field in form if field.name not in ['csrf_token', 'email', 'password', 'passwordRepeat', 'submit'] %}
+            <p>
+                {{ field.label }}<br>
+                {{ field(class="form-control") }}<br>
+                {% for error in field.errors %}
+                    <p class="alert alert-danger" role="alert">{{ error }}</p>
+                {% endfor %}
+            </p>
+        {% endfor %}
+        <p>{{ form.submit(type="submit", class="btn btn-warning") }}</p>
+        <div>{{ message }}</div>
+    </form>
+{% endblock %}
