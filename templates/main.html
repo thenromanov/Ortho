@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+    <form class="beautify-form" action="" method="post">
+        {{ form.hidden_tag() }}
+        <h2>Text beautifier</h2>
+        <p>
+            {{ form.text(class="textarea-control") }}<br>
+        </p>
+        <p>{{ form.submit(type="submit", class="btn btn-warning") }}</p>
+    </form>
+{% endblock %}

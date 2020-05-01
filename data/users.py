@@ -13,6 +13,7 @@ class User(SqlAlchemyBase, UserMixin):
     age = Column(Integer, nullable=True)
     email = Column(String, index=True, unique=True, nullable=True)
     hashedPassword = Column(String, nullable=True)
+    mistakes = orm.relation('Mistake', secondary='association', back_populates='users')
 
     def __repr__(self):
         return f'<User> {self.id} {self.surname} {self.name}'

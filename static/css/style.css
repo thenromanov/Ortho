@@ -35,12 +35,19 @@ body {
   background: #e5e5e5;
 }
 
-form.register-form, form.login-form {
+form.register-form, form.login-form, form.beautify-form{
   margin-left: auto;
   margin-right: auto;
   max-width: 800px
 }
-form.register-form h2, form.login-form h2 {
+
+form.result-form {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1200px
+}
+
+form.register-form h2, form.login-form h2, form.beautify-form h2, form.result-form h2{
   text-align: center;
   font: normal 40px 'Fugaz One', cursive;
   color: #14213d;
@@ -49,4 +56,42 @@ form.register-form h2, form.login-form h2 {
 form.register-form label, form.login-form label {
   font: normal 20px 'Fugaz One', cursive;
   color: #14213d;
+}
+
+textarea {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  outline-color: #fca311;
+  outline-width: 2px;
+  border: 1px solid #fca311;
+  resize: none;
+  wrap: off;
+  overflow: auto;
+  min-height: 500px;
+  width: 800px;
+  font-size: 20px;
+  border-radius: 10px;
+}
+
+div.container {
+  border: 2px solid #fca311;
+  border-radius: 10px;
+  text-align: center;
+}
+
+div.head {
+  font: normal 18px 'Fugaz One', cursive;
+  background-color: #14213d;
+  color: #fca311;
+  height: 150%;
+  border: 1px solid #fca311;
+}
+
+div.body {
+  font-size: 15pt;
+  background-color: #ffffff;
+  color: #14213d;
+  height: 150%;
+  border: 1px solid #fca311;
 }

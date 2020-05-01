@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+    <form class="result-form" action= "" method="get">
+        <h2>Corrected text</h2>
+        <textarea name="result-area" rows="8" cols="50" readonly>{{ text }}</textarea>
+        {% if tablelist|length == 0 %}
+            <h2>You did not make any mistakes</h2>
+        {% else %}
+            <h2>Mistakes list</h2>
+            <div class="container">
+                <div class="row">
+                    <div class="col-xl-1 head">№</div>
+                    <div class="col-xl-4 head">Wrong word</div>
+                    <div class="col-xl-4 head">Correct word</div>
+                    <div class="col-xl-1 head">Position</div>
+                    <div class="col-xl-2 head">Language</div>
+                </div>
+            {% for mistake in tablelist %}
+                <div class="row">
+                    <div class="col-xl-1 body">{{ loop.index }}</div>
+                    <div class="col-xl-4 body">{{ mistake["wrong"] }}</div>
+                    <div class="col-xl-4 body">{{ mistake["correct"] }}</div>
+                    <div class="col-xl-1 body">{{ mistake["pos"] }}</div>
+                    <div class="col-xl-2 body">{{ mistake["lang"] }}</div>
+                </div>
+            {% endfor %}
+            </div>
+        {% endif %}
+    </form>
+{% endblock %}
