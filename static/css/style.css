@@ -28,7 +28,7 @@ header {
 	cursor: pointer;
 	font-weight: normal;
   font-size: 24px;
-  font-family: 'Fugaz One'
+  font-family: 'Bitter', serif;
 }
 
 body {
@@ -49,12 +49,12 @@ form.result-form {
 
 form.register-form h2, form.login-form h2, form.beautify-form h2, form.result-form h2{
   text-align: center;
-  font: normal 40px 'Fugaz One', cursive;
+  font: normal 40px 'Bitter', serif;
   color: #14213d;
 }
 
 form.register-form label, form.login-form label {
-  font: normal 20px 'Fugaz One', cursive;
+  font: normal 20px 'Bitter', serif;
   color: #14213d;
 }
 
@@ -74,14 +74,14 @@ textarea {
   border-radius: 10px;
 }
 
-div.container {
+div.cont {
   border: 2px solid #fca311;
   border-radius: 10px;
   text-align: center;
 }
 
 div.head {
-  font: normal 18px 'Fugaz One', cursive;
+  font: normal 18px 'Bitter', serif;
   background-color: #14213d;
   color: #fca311;
   height: 150%;
@@ -94,4 +94,35 @@ div.body {
   color: #14213d;
   height: 150%;
   border: 1px solid #fca311;
+}
+
+div.table {
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  border: 2px solid #fca311;
+  border-radius: 10px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+}
+
+table {
+  text-align: center;
+  width: 100%;
+}
+
+th, td, thead, tbody {
+  border: 2px solid #fca311;
+}
+
+th {
+  font: normal 17pt 'Bitter', serif;
+  background-color: #14213d;
+  color: #fca311;
+}
+
+td {
+  font-size: 15pt;
+  background-color: #ffffff;
+  color: #14213d;
 }
