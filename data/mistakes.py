@@ -16,4 +16,4 @@ class Mistake(SqlAlchemyBase):
     users = orm.relation('User', secondary='association', back_populates='mistakes')
 
     def __repr__(self):
-        return f'<Mistake> self.id self.name>'
+        return f'<Mistake> {self.id} {self.name}>'

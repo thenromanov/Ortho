@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-6">
+                <div class="table">
+                    <table class="sortable">
+                        <thead>
+                            <tr>
+                                <th>Word</th>
+                                <th>Count</th>
+                                <th>Language</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mistake in mistakes|sort(reverse=True, attribute="count")%}
+                                <tr class="item">
+                                    <td>{{ mistake.name }}</td>
+                                    <td>{{ mistake.count }}</td>
+                                    <td>{% for language in languages %}{% if language.id == mistake.language %}{{ language.acronym }}{% endif %}{% endfor %}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-xl-6">
+                {{ charts.local_popularity }}
+                {{ charts.local_language }}
+            </div>
+        </div>
+    </div>
+{% endblock %}

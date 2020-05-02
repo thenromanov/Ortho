@@ -149,30 +149,71 @@ def globalStats():
     languages = session.query(Language).all()
     popularityChart = PieChart('popularity', options={'title': 'Mistakes popularity',
                                                       'height': 400})
-    popularityChart.add_column('string', 'Word')
-    popularityChart.add_column('number', 'Count')
-    popularityChart.add_rows([[mistake.name, mistake.count] for mistake in mistakes])
+    popularityData = getPopularityData(mistakes)
+    for column in popularityData['columns']:
+        popularityChart.add_column(*column)
+    popularityChart.add_rows(popularityData['rows'])
     charts.register(popularityChart)
     ageChart = ColumnChart('age', options={'title': 'Mistakes by age',
                                            'height': 400})
-    ageChart.add_column('string', 'Age range')
-    ageChart.add_column('number', 'Count')
-    ages = defaultdict(int)
-    for user in users:
-        ages[user.age // 10] += len(user.mistakes)
-    ageChart.add_rows([[f'{item[0] * 10} - {item[0] * 10 + 9}', item[1]] for item in ages.items()])
+    ageData = getAgeData(mistakes, users)
+    for column in ageData['columns']:
+        ageChart.add_column(*column)
+    ageChart.add_rows(ageData['rows'])
     charts.register(ageChart)
     languageChart = PieChart('language', options={'title': 'Mistakes by language',
                                                   'height': 400})
-    languageChart.add_column('string', 'Language')
-    languageChart.add_column('number', 'Count')
+    languagesData = getLanguagesData(mistakes)
+    for column in languagesData['columns']:
+        languageChart.add_column(*column)
+    languageChart.add_rows(languagesData['rows'])
+    charts.register(languageChart)
+    return render_template('global_stats.html', title='Stats', mistakes=mistakes, languages=languages)
+
+
+@app.route('/local_stats')
+@login_required
+def localStats():
+    session = dbSession.createSession()
+    mistakes = current_user.mistakes
+    languages = session.query(Language).all()
+    popularityChart = PieChart('local_popularity', options={'title': 'Mistakes popularity',
+                                                            'height': 400})
+    popularityData = getPopularityData(mistakes)
+    for column in popularityData['columns']:
+        popularityChart.add_column(*column)
+    popularityChart.add_rows(popularityData['rows'])
+    charts.register(popularityChart)
+    languageChart = PieChart('local_language', options={'title': 'Mistakes by language',
+                                                        'height': 400})
+    languagesData = getLanguagesData(mistakes)
+    for column in languagesData['columns']:
+        languageChart.add_column(*column)
+    languageChart.add_rows(languagesData['rows'])
+    charts.register(languageChart)
+    return render_template('local_stats.html', title='Stats', mistakes=mistakes, languages=languages)
+
+
+def getPopularityData(mistakes):
+    return {'columns': [['string', 'Word'], ['number', 'Count']],
+            'rows': [[mistake.name, mistake.count] for mistake in mistakes]}
+
+
+def getAgeData(mistakes, users):
+    ages = defaultdict(int)
+    for user in users:
+        ages[user.age // 10] += len(user.mistakes)
+    return {'columns': [['string', 'Age range'], ['number', 'Count']],
+            'rows': [[f'{item[0] * 10} - {item[0] * 10 + 9}', item[1]] for item in ages.items()]}
+
+
+def getLanguagesData(mistakes):
+    session = dbSession.createSession()
     langs = defaultdict(int)
     for mistake in mistakes:
         langs[mistake.language] += mistake.count
-    languageChart.add_rows([[session.query(Language).get(item[0]).acronym, item[1]]
-                            for item in langs.items()])
-    charts.register(languageChart)
-    return render_template('global_stats.html', title='Stats', mistakes=mistakes, languages=languages)
+    return {'columns': [['string', 'Language'], ['number', 'Count']],
+            'rows': [[session.query(Language).get(item[0]).acronym, item[1]] for item in langs.items()]}
 
 
 def main():
