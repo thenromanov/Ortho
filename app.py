@@ -14,7 +14,7 @@ from data.association import Association
 from modules import speller, translator
 from collections import defaultdict
 from secrets import token_urlsafe
-from api import mistakesResources
+from api import mistakesResources, statisticsResources
 import json
 import copy
 import pymorphy2
@@ -231,6 +231,7 @@ def localStats():
 def main():
     dbSession.globalInit('db/ortho.sqlite')
     api.add_resource(mistakesResources.MistakesResouce, '/api/mistakes')
+    api.add_resource(statisticsResources.StatisticsResource, '/api/statistics')
     app.run()
 
 
