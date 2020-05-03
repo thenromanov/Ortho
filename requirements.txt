@@ -9,3 +9,4 @@ SQLAlchemy_serializer==1.3.4.2
 Flask==1.1.1
 Flask_Login==0.5.0
 Flask_GoogleCharts==0.1.0
+gunicorn==20.0.4
