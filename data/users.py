@@ -2,9 +2,10 @@ from sqlalchemy import orm, Integer, String, Column
 from .dbSession import SqlAlchemyBase
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
+from sqlalchemy_serializer import SerializerMixin
 
 
-class User(SqlAlchemyBase, UserMixin):
+class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -13,7 +14,8 @@ class User(SqlAlchemyBase, UserMixin):
     age = Column(Integer, nullable=True)
     email = Column(String, index=True, unique=True, nullable=True)
     hashedPassword = Column(String, nullable=True)
-    mistakes = orm.relation('Mistake', secondary='association', back_populates='users')
+    token = Column(String, nullable=True)
+    mistakes = orm.relation('Association', back_populates='users')
 
     def __repr__(self):
         return f'<User> {self.id} {self.surname} {self.name}'

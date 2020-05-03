@@ -35,7 +35,7 @@ body {
   background: #e5e5e5;
 }
 
-form.register-form, form.login-form, form.beautify-form{
+form.register-form, form.login-form, form.beautify-form, form.token-form {
   margin-left: auto;
   margin-right: auto;
   max-width: 800px
@@ -47,7 +47,7 @@ form.result-form {
   max-width: 1200px
 }
 
-form.register-form h2, form.login-form h2, form.beautify-form h2, form.result-form h2{
+form.register-form h2, form.login-form h2, form.beautify-form h2, form.result-form h2, form.token-form h2{
   text-align: center;
   font: normal 40px 'Bitter', serif;
   color: #14213d;
@@ -72,6 +72,14 @@ textarea {
   width: 800px;
   font-size: 20px;
   border-radius: 10px;
+}
+
+input.token {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 300px;
+  text-align: center;
 }
 
 div.cont {

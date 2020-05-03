@@ -2,6 +2,7 @@ from flask import Flask, render_template, redirect, request, make_response, json
 from flask_wtf import FlaskForm
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_googlecharts import GoogleCharts, PieChart, ColumnChart
+from flask_restful import Api
 from wtforms import IntegerField, StringField, PasswordField, BooleanField, SubmitField, TextAreaField
 from wtforms.fields.html5 import EmailField
 from wtforms.validators import DataRequired, length
@@ -9,15 +10,19 @@ from data import dbSession
 from data.users import User
 from data.mistakes import Mistake
 from data.languages import Language
+from data.association import Association
 from modules import speller, translator
 from collections import defaultdict
+from secrets import token_urlsafe
+from api import mistakesResources
 import json
 import copy
 import pymorphy2
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'Kr,}je-c+45m{G4=8y&t'
+app.config['SECRET_KEY'] = token_urlsafe(16)
 charts = GoogleCharts(app)
+api = Api(app)
 
 morph = pymorphy2.MorphAnalyzer()
 
@@ -65,7 +70,8 @@ def register():
         user = User(email=form.email.data,
                     surname=form.surname.data,
                     name=form.name.data,
-                    age=form.age.data)
+                    age=form.age.data,
+                    token=token_urlsafe(16))
         user.setPassword(form.password.data)
         session.add(user)
         session.commit()
@@ -93,6 +99,12 @@ def logout():
     return redirect('/')
 
 
+@app.route('/token')
+@login_required
+def tokenPage():
+    return render_template('token.html')
+
+
 @app.route('/', methods=['GET', 'POST'])
 def mainPage():
     form = BeautifierForm()
@@ -111,33 +123,35 @@ def result():
     delta = 0
     tablelist = []
     for m in mistakes:
-        word = m['s'][0]
+        correct = m['s'][0]
         wrong = text[m['pos']:m['pos'] + m['len']]
-        normal = morph.parse(word)[0].normal_form
-        lang = translator.getLanguage(word)
+        normal = morph.parse(correct)[0].normal_form
+        langAcronym = translator.getLanguage(correct)
+        corrected = corrected[:m['pos'] + delta] + correct + corrected[m['pos'] + m['len'] + delta:]
+        delta += len(correct) - len(wrong)
         session = dbSession.createSession()
-        language = session.query(Language).filter(Language.acronym == lang).first()
-        if language is None:
-            language = Language(acronym=lang)
+        language = session.query(Language).filter(Language.acronym == langAcronym).first()
+        if not language:
+            language = Language(acronym=langAcronym)
             session.add(language)
-            session.commit()
-        corrected = corrected[:m['pos'] + delta] + word + corrected[m['pos'] + m['len'] + delta:]
-        delta += len(word) - len(wrong)
-        session = dbSession.createSession()
         mistake = session.query(Mistake).filter(Mistake.name == normal).first()
-        if mistake is None:
+        if not mistake:
             mistake = Mistake(name=normal, count=0, language=language.id)
             session.add(mistake)
         mistake.count += 1
         if current_user.is_authenticated:
-            user = session.query(User).get(current_user.id)
-            user.mistakes.append(mistake)
-            session.merge(user)
+            association = session.query(Association).filter(
+                Association.mistake == mistake.id, Association.user == current_user.id).first()
+            if not association:
+                association = Association(mistake=mistake.id, count=0)
+                user = session.query(User).get(current_user.id)
+                user.mistakes.append(association)
+            association.count += 1
         session.commit()
         tablelist.append({'wrong': wrong.lower(),
-                          'correct': word.lower(),
+                          'correct': correct.lower(),
                           'pos': m['pos'],
-                          'lang': lang})
+                          'lang': langAcronym})
     return render_template('result.html', title='Result', text=corrected, tablelist=tablelist)
 
 
@@ -145,79 +159,78 @@ def result():
 def globalStats():
     session = dbSession.createSession()
     mistakes = session.query(Mistake).all()
-    users = session.query(User).all()
-    languages = session.query(Language).all()
+    tablelist = []
+    for mistake in mistakes:
+        language = session.query(Language).get(mistake.language)
+        tablelist.append({'name': mistake.name,
+                          'count': mistake.count,
+                          'lang': language.acronym})
+
     popularityChart = PieChart('popularity', options={'title': 'Mistakes popularity',
                                                       'height': 400})
-    popularityData = getPopularityData(mistakes)
-    for column in popularityData['columns']:
-        popularityChart.add_column(*column)
-    popularityChart.add_rows(popularityData['rows'])
+    popularityChart.add_column('string', 'Word')
+    popularityChart.add_column('number', 'Count')
+    popularityChart.add_rows([[item['name'], item['count']] for item in tablelist])
     charts.register(popularityChart)
+
     ageChart = ColumnChart('age', options={'title': 'Mistakes by age',
                                            'height': 400})
-    ageData = getAgeData(mistakes, users)
-    for column in ageData['columns']:
-        ageChart.add_column(*column)
-    ageChart.add_rows(ageData['rows'])
+    ages = defaultdict(int)
+    for user in session.query(User).all():
+        for mistake in user.mistakes:
+            ages[user.age // 10] += mistake.count
+    ageChart.add_column('string', 'Age range')
+    ageChart.add_column('number', 'Count')
+    ageChart.add_rows([[f'{item[0] * 10} - {item[0] * 10 + 9}', item[1]] for item in ages.items()])
     charts.register(ageChart)
+
     languageChart = PieChart('language', options={'title': 'Mistakes by language',
                                                   'height': 400})
-    languagesData = getLanguagesData(mistakes)
-    for column in languagesData['columns']:
-        languageChart.add_column(*column)
-    languageChart.add_rows(languagesData['rows'])
+    langs = defaultdict(int)
+    for item in tablelist:
+        langs[item['lang']] += item['count']
+    languageChart.add_column('string', 'Language')
+    languageChart.add_column('number', 'Count')
+    languageChart.add_rows([[item[0], item[1]] for item in langs.items()])
     charts.register(languageChart)
-    return render_template('global_stats.html', title='Stats', mistakes=mistakes, languages=languages)
+    return render_template('global_stats.html', title='Stats', mistakes=tablelist)
 
 
 @app.route('/local_stats')
 @login_required
 def localStats():
     session = dbSession.createSession()
-    mistakes = current_user.mistakes
-    languages = session.query(Language).all()
+    user = session.query(User).get(current_user.id)
+    tablelist = []
+    for association in user.mistakes:
+        mistake = session.query(Mistake).get(association.mistake)
+        language = session.query(Language).get(mistake.language)
+        tablelist.append({'name': mistake.name,
+                          'count': association.count,
+                          'lang': language.acronym})
+
     popularityChart = PieChart('local_popularity', options={'title': 'Mistakes popularity',
                                                             'height': 400})
-    popularityData = getPopularityData(mistakes)
-    for column in popularityData['columns']:
-        popularityChart.add_column(*column)
-    popularityChart.add_rows(popularityData['rows'])
+    popularityChart.add_column('string', 'Word')
+    popularityChart.add_column('number', 'Count')
+    popularityChart.add_rows([[item['name'], item['count']] for item in tablelist])
     charts.register(popularityChart)
+
     languageChart = PieChart('local_language', options={'title': 'Mistakes by language',
                                                         'height': 400})
-    languagesData = getLanguagesData(mistakes)
-    for column in languagesData['columns']:
-        languageChart.add_column(*column)
-    languageChart.add_rows(languagesData['rows'])
-    charts.register(languageChart)
-    return render_template('local_stats.html', title='Stats', mistakes=mistakes, languages=languages)
-
-
-def getPopularityData(mistakes):
-    return {'columns': [['string', 'Word'], ['number', 'Count']],
-            'rows': [[mistake.name, mistake.count] for mistake in mistakes]}
-
-
-def getAgeData(mistakes, users):
-    ages = defaultdict(int)
-    for user in users:
-        ages[user.age // 10] += len(user.mistakes)
-    return {'columns': [['string', 'Age range'], ['number', 'Count']],
-            'rows': [[f'{item[0] * 10} - {item[0] * 10 + 9}', item[1]] for item in ages.items()]}
-
-
-def getLanguagesData(mistakes):
-    session = dbSession.createSession()
     langs = defaultdict(int)
-    for mistake in mistakes:
-        langs[mistake.language] += mistake.count
-    return {'columns': [['string', 'Language'], ['number', 'Count']],
-            'rows': [[session.query(Language).get(item[0]).acronym, item[1]] for item in langs.items()]}
+    for item in tablelist:
+        langs[item['lang']] += item['count']
+    languageChart.add_column('string', 'Language')
+    languageChart.add_column('number', 'Count')
+    languageChart.add_rows([[item[0], item[1]] for item in langs.items()])
+    charts.register(languageChart)
+    return render_template('local_stats.html', title='Local stats', mistakes=tablelist)
 
 
 def main():
     dbSession.globalInit('db/ortho.sqlite')
+    api.add_resource(mistakesResources.MistakesResouce, '/api/mistakes')
     app.run()
 
 

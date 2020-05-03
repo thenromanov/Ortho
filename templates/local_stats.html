@@ -15,9 +15,9 @@
                         <tbody>
                             {% for mistake in mistakes|sort(reverse=True, attribute="count")%}
                                 <tr class="item">
-                                    <td>{{ mistake.name }}</td>
-                                    <td>{{ mistake.count }}</td>
-                                    <td>{% for language in languages %}{% if language.id == mistake.language %}{{ language.acronym }}{% endif %}{% endfor %}</td>
+                                    <td>{{ mistake['name'] }}</td>
+                                    <td>{{ mistake['count'] }}</td>
+                                    <td>{{ mistake['lang'] }}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>

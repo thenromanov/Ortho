@@ -1,8 +1,9 @@
 from sqlalchemy import Integer, String, Column
 from .dbSession import SqlAlchemyBase
+from sqlalchemy_serializer import SerializerMixin
 
 
-class Language(SqlAlchemyBase):
+class Language(SqlAlchemyBase, SerializerMixin):
     __tablename__ = 'languages'
 
     id = Column(Integer, primary_key=True, autoincrement=True)

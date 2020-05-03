@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block content %}
+    <form class="token-form" action="" method="get">
+        <h2>Your API token</h2>
+        <input class="token" type="text" readonly value="{{ current_user.token }}">
+    </form>
+{% endblock %}
