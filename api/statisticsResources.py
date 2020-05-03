@@ -27,4 +27,4 @@ class StatisticsResource(Resource):
                 langs[language.acronym] += mistake.count
             for item in langs.items():
                 tablelist.append({item[0]: item[1]})
-        return tablelist
+        return jsonify({'statistics': tablelist})

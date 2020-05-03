@@ -1,5 +1,7 @@
 import requests
 
+''' Модуль Яндекс.Переводчика '''
+
 
 def getLanguage(text):
     url = 'https://translate.yandex.net/api/v1.5/tr.json/detect'

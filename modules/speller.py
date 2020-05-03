@@ -1,5 +1,7 @@
 import requests
 
+''' Модуль Яндекс.Спеллера '''
+
 
 def getMistakes(text):
     url = 'https://speller.yandex.net/services/spellservice.json/checkText'
