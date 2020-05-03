@@ -249,7 +249,7 @@ def localStats():
 
 
 def main():
-    dbSession.globalInit('db/ortho.sqlite')
+    dbSession.globalInit('db/ortho.db')
     api.add_resource(mistakesResources.MistakesResouce, '/api/mistakes')
     api.add_resource(statisticsResources.StatisticsResource, '/api/statistics')
     api.add_resource(beautifierResources.BeautifierResource, '/api/beautifier')
