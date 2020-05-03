@@ -21,6 +21,7 @@ import pymorphy2
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = token_urlsafe(16)  # Генерируем защитный ключ
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db/ortho.db'
 charts = GoogleCharts(app)  # Инициализируем диаграммы
 api = Api(app)  # Инициализируем API
 
